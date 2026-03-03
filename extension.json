@@ -1,9 +1,9 @@
 {
-    "module": "{@name}",
-    "name": "{@nameLabel}",
-    "description": "{@description}",
-    "author": "{@author}",
-    "bundled": {@bundled},
+    "module": "GoogleWorkspace",
+    "name": "GoogleWorkspace",
+    "description": "Google Workspace SSO/SCIM integration for EspoCRM.",
+    "author": "Metrodora APS",
+    "bundled": true,
     "acceptableVersions": [
         ">=9.3.0"
     ],

@@ -1,358 +1,60 @@
-# Template repository for EspoCRM extensions
+# EspoCRM Google Workspace SSO Authentication Extension
 
-Create a repository for your extension from this template.
+This extension integrates Google Workspace Single Sign-On (SSO) as a native authentication method for EspoCRM v9.x.
 
-## Preparing repository
+## Features
 
-Run:
+- **Google Workspace Native Integration**: Allow users to log in directly using their Google Workspace accounts.
+- **Admin Configuration**: Completely manageable from the EspoCRM Administration panel (Settings > Authentication).
+- **Domain Restriction**: Restrict logins exclusively to users belonging to a specific Hosted Domain (e.g., yourcompany.com), rejecting external users automatically.
+- **Auto-create Users**: Optionally autocreate EspoCRM users upon successful SSO login for accounts that do not already exist in the CRM database.
+- **Avatar Synchronization**: Automatically download and synchronize the user's Google Workspace profile picture into EspoCRM.
+- **Fallback Authentication**: Flexible options to allow a standard username & password login fallback alongside Google Workspace authentication, configurable independently for Administrators and Regular Users.
 
-```
-php init.php
-```
+## Supported Versions
 
-It will ask to enter an extension name and some other information.
+* EspoCRM: >= 9.3.0
+* PHP: >= 8.3
 
-After that, you can remove `init.php` file from your repository. Commit changes and proceed to configuration & building.
+## Installation
 
-After initialization, placeholders in the readme file will be replaced with values specific to your extension.
-Use the changed readme as the documentation.
+1. Navigate to Administration > Extensions.
+2. Upload the `google-workspace-x.x.x.zip` package.
+3. Once the installation is complete, navigate to Administration > Clear Cache and clear the system cache.
 
 ## Configuration
 
-Create `config.json` file in the root directory. You can copy `config-default.json` and rename it to `config.json`.
+### 1. Set up OAuth in Google Cloud Console
+1. Access the [Google Cloud Console](https://console.cloud.google.com/).
+2. Head to **APIs & Services > Credentials**.
+3. Create a new OAuth 2.0 Client ID (Application Type: Web Application).
+4. For the **Authorized redirect URIs**, add the specific Redirect URI shown in the EspoCRM Authentication settings.
 
-When reading, this config will be merged with `config-default.json`. You can override default parameters in the created config.
+### 2. Configure EspoCRM
+1. Go to **Administration > Settings**.
+2. Locate the **Authentication Method** dropdown and select `Google Workspace`.
+3. Provide the required parameters:
+   - **Google Workspace Client ID**: Your OAuth 2.0 Client ID.
+   - **Google Workspace Client Secret**: Your OAuth 2.0 Client Secret.
+   - **Redirect URI**: The URL to provide to Google Cloud Console for the OAuth client.
+   - **Hosted Domain (Optional)**: If you specify a domain (like `company.com`), only users matching this domain will be able to log in.
+   - **Auto-create Users (Optional)**: If enabled, users successfully authenticated via Google Workspace but missing in EspoCRM will be automatically created (name, surname, email).
+   - **Allow Administrator fallback**: Whether or not administrators can still fall back to logging in using a username and password.
+   - **Allow Regular User fallback**: Whether or not regular users can still fall back to logging in using a username and password.
+   - **Sync Avatar (Optional)**: If enabled, EspoCRM will dynamically sync the user's avatar from their Google Workspace profile upon login.
 
-Parameters:
+## Building from source
 
-* espocrm.repository – from what repository to fetch EspoCRM;
-* espocrm.branch – what branch to fetch (`stable` is set by default); you can specify version number instead (e.g. `9.1.0`);
-* database - credentials of the dev database;
-* install.siteUrl – site url of the dev instance;
-* install.defaultOwner – a webserver owner (important to be set right);
-* install.defaultGroup – a webserver group (important to be set right).
+To generate an installable zip package, ensure you have `node`, `npm`, and `composer` globally installed:
 
-
-## Config for EspoCRM instance
-
-You can override EspoCRM config. Create `config.php` in the root directory of the repository. This file will be applied after EspoCRM installation (when building).
-
-Example:
-
-```php
-<?php
-return [
-    'useCacheInDeveloperMode' => true,
-];
-```
-
-## Building
-
-After building, EspoCRM instance with installed extension will be available at `site` directory. You will be able to access it with credentials:
-
-* Username: admin
-* Password: 1
-
-### Preparation
-
-1. You need to have *node*, *npm*, *composer* installed.
-2. Run `npm install`.
-3. Create a database. Note that without the created database instance building will fail. The database name is set in the config file. You can change it.
-
-### Full EspoCRM instance building
-
-It will download EspoCRM (from the repository specified in the config), then build and install it. Then it will install the extension.
-
-Command:
-
-```
-npm run all
-```
-
-Note: It will remove a previously installed EspoCRM instance, but keep the database intact.
-
-Note: If an error occurred, check `site/data/logs/` for details. It's often a database is not created.
-
-### Copying extension files to EspoCRM instance
-
-You need to run this command every time you make changes in `src` directory, and you want to try these changes on Espo instance.
-
-Command:
-
-```
-npm run sync
-```
-
-To avoid running this command manually, use a file watcher in your IDE. The configuration for PhpStorm is included in this repository. See below about the file watcher.
-
-### Running after-install script
-
-AfterInstall.php will be applied for EspoCRM instance.
-
-Command:
-
-```
-node build --after-install
-```
-
-### Extension package building
-
-Command:
-
-```
+```bash
+npm install
 npm run extension
 ```
 
-The package will be created in `build` directory.
-
-Note: The version number is taken from `package.json`.
-
-### Installing addition extensions
-
-If your extension requires other extensions, there is a way to install them automatically while building the instance.
-
-Necessary steps:
-
-1. Add the current EspoCRM version to the `config.php`:
-
-```php
-<?php
-return [
-    'version' => '9.0.0',
-];
-
-```
-
-2. Create the `extensions` directory in the root directory of your repository.
-3. Put needed extensions (e.g. `my-extension-1.0.0.zip`) in this directory.
-
-Extensions will be installed automatically after running the command `node build --all` or `node build --install`.
-
-## Development workflow
-
-1. Do development in `src` dir.
-2. Run `npm run sync`.
-3. Test changes in EspoCRM instance at `site` dir.
-
-## Using entity manager to create entities
-
-You can block out new entity types right in Espo (using Entity Manager) and then copy generated custom files (`site/custom` dir) to the repository (`src` dir) using `copy-custom.js` script.
-
-1. Create entity types, fields, layouts, relationships in Espo (it should be available in `site` dir after building).
-2. Run `node copy-custom.js`. It will copy all files from `site/custom` to `src/files/custom/Espo/Modules/{@name}` and apply needed modifications to files.
-3. Remove files from `site/custom`.
-4. Run `npm run sync`. It will copy files from the repository to Espo build (`site/custom//Espo/Modules/{@name}` dir).
-5. Clear cache in Espo.
-6. Test in Espo.
-7. Commit changes.
-
-You can remove `copy-custom.js` from the repository if you don't plan to use it future.
-
-## Using composer in extension
-
-If your extension requires additional libraries, they can be installed by composer:
-
-1. Create a file `src/files/custom/Espo/Modules/{@name}/composer.json` with your dependencies.
-2. Once you run `node build --all` or `node build --composer-install`, composer dependencies will be automatically installed.
-3. Create a file `src/files/custom/Espo/Modules/{@name}/Resources/autoload.json`.
-
-Note: The extension build will contain only the `vendor` directory without the `composer.json` file.
-
-The `autoload.json` file defines paths for namespaces:
-
-```json
-{
-    "psr-4": {
-        "LibraryNamespace\\": "custom/Espo/Modules/{@name}/vendor/<vendor-name>/<library-name>/path/to/src"
-    }
-}
-```
-
-## Versioning
-
-The version number is stored in `package.json` and `package-lock.json`.
-
-Bumping version:
-
-```
-npm version patch
-npm version minor
-npm version major
-```
-
-## Tests
-
-To prepare the Espo instance:
-
-```
-npm run prepare-test
-```
-
-Fetches the instance and runs composer install. To be used for unit tests and static analysis in CI environment. Takes less time than the full installation.
-
-
-### Unit
-
-Run composer install for the site:
-
-```
-(cd site; composer install)
-```
-
-Command to run unit tests:
-
-```
-(npm run sync; cd site; vendor/bin/phpunit tests/unit/Espo/Modules/{@name})
-```
-
-or
-
-```
-npm run unit-tests
-```
-
-### Integration
-
-You need to build a test instance first:
-
-1. `npm run sync`
-2. `(cd site; grunt test)`
-
-You need to create a config file `tests/integration/config.php`:
-
-```php
-<?php
-
-return [
-    'database' => [
-        'driver' => 'pdo_mysql',
-        'host' => 'localhost',
-        'charset' => 'utf8mb4',
-        'dbname' => 'TEST_DB_NAME',
-        'user' => 'YOUR_DB_USER',
-        'password' => 'YOUR_DB_PASSWORD',
-    ],
-];
-```
-
-Command to run integration tests:
-
-```
-(npm run sync; cd site; vendor/bin/phpunit tests/integration/Espo/Modules/{@name})
-```
-
-or
-
-```
-npm run integration-tests
-```
-
-Note that integration tests needs the full Espo installation.
-
-### Static analysis
-
-Command to run:
-
-```
-npm run sync; site/vendor/bin/phpstan
-```
-
-or
-
-```
-npm run sa
-```
-
-If your extension contains additional PHP packages, you also need to add `site/custom/Espo/Modules/{@name}/vendor` to the *scanDirectories* section in *phpstan.neon* config.
-
-Note: You can omit *composer-install* command if your extension does not contain PHP packages.
-
-## Configuring IDE
-
-You need to set the following paths to be ignored in your IDE:
-
-* `build`
-* `site/build`
-* `site/custom/`
-* `site/client/custom/`
-* `site/tests/unit/Espo/Modules/{@name}`
-* `site/tests/integration/Espo/Modules/{@name}`
-
-### File watcher
-
-You can set up a file watcher in the IDE to automatically copy and transpile files upon saving.
-
-File watcher parameters for PhpStorm:
-
-* Program: `node`
-* Arguments: `build --copy-file --file=$FilePathRelativeToProjectRoot$`
-* Working Directory: `$ProjectFileDir$`
-
-Note: The File Watcher configuration for PhpStorm is included in this repository.
-
-## Using ES modules
-
-The initialization script asks whether you want to use ES6 modules. It's recommended to choose "YES".
-
-If you have chosen No and want to switch to ES6 later, then:
-
-1. Set *bundled* to true in `extension.json`.
-2. Set *bundled* and *jsTranspiled* to true in `src/files/custom/Espo/Modules/{@name}/Resources/module.json`.
-3. Add `src/files/custom/Espo/Modules/{@name}/Resources/metadata/app/client.json`
-    ```json
-    {
-        "scriptList": [
-            "__APPEND__",
-            "client/custom/modules/{@nameHyphen}/lib/init.js"
-        ]
-    }
-    ```
-
-## Javascript frontend libraries
-
-Install *rollup*.
-
-In `extension.json`, add a command that will bundle the needed library into an AMD module. Example:
-
-```json
-{
-    "scripts": [
-        "npx rollup node_modules/some-lib/build/esm/index.mjs --format amd --file build/assets/lib/some-lib.js --amd.id some-lib"
-    ]
-}
-```
-
-Add the library module path to `src/files/custom/Espo/Modules/{@name}/Resources/metadata/app/jsLibs.json`
-
-```json
-{
-    "some-lib": {
-        "path": "client/custom/modules/{@nameHyphen}/lib/some-lib.js"
-    }
-}
-```
-
-When you build, the library module will be automatically included in the needed location.
-
-Note that you may also need to create *rollup.config.js* to set some additional Rollup parameters that are not supported via CLI usage.
-
-## Updating tooling libraries
-
-Update the version number of espo-extension-tools in package.json to the [latest one](https://github.com/espocrm/extension-tools/releases).
-
-Run:
-
-```
-npm update espo-extension-tools
-npm update espo-frontend-build-tools
-```
-
-Or just update everything:
-
-```
-npm update
-```
+The extension `.zip` package will be created in the `build/` directory.
 
 ## License
 
-Change the license in `LICENSE` file. The current license is intended for scripts of this repository. It's not supposed to be used for code of your extension.
+This project is licensed under the [MIT License](LICENSE).
+Copyright (c) 2026 Metrodora APS

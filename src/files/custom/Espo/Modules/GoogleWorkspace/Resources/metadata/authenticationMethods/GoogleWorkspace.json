@@ -1,0 +1,86 @@
+{
+    "implementationClassName": "Espo\\Modules\\GoogleWorkspace\\Authentication\\GoogleWorkspace\\Login",
+    "logoutClassName": "Espo\\Modules\\GoogleWorkspace\\Authentication\\GoogleWorkspace\\Logout",
+    "login": {
+        "handler": "google-workspace:handlers/login/google-workspace",
+        "fallbackConfigParam": "googleWorkspaceAllowAdminFallback"
+    },
+    "provider": {
+        "isAvailable": true
+    },
+    "settings": {
+        "isAvailable": true,
+        "layout": {
+            "label": "Google Workspace",
+            "rows": [
+                [
+                    {"name": "googleWorkspaceClientId"}
+                ],
+                [
+                    {"name": "googleWorkspaceClientSecret"}
+                ],
+                [
+                    {
+                        "name": "googleWorkspaceRedirectUri",
+                        "view": "views/settings/fields/oidc-redirect-uri",
+                        "params": {
+                            "readOnly": true,
+                            "copyToClipboard": true
+                        }
+                    }
+                ],
+                [
+                    {"name": "googleWorkspaceHostedDomain"}
+                ],
+                [
+                    {"name": "googleWorkspaceCreateUser"}
+                ],
+                [
+                    {"name": "googleWorkspaceAllowAdminFallback"}
+                ],
+                [
+                    {"name": "googleWorkspaceAllowRegularFallback"}
+                ],
+                [
+                    {"name": "googleWorkspaceSyncAvatar"}
+                ]
+            ]
+        },
+        "fieldList": [
+            "googleWorkspaceClientId",
+            "googleWorkspaceClientSecret",
+            "googleWorkspaceRedirectUri",
+            "googleWorkspaceHostedDomain",
+            "googleWorkspaceCreateUser",
+            "googleWorkspaceAllowAdminFallback",
+            "googleWorkspaceAllowRegularFallback",
+            "googleWorkspaceSyncAvatar"
+        ],
+        "dynamicLogic": {
+            "fields": {
+                "googleWorkspaceClientId": {
+                    "required": {
+                        "conditionGroup": [
+                            {
+                                "type": "equals",
+                                "attribute": "authenticationMethod",
+                                "value": "GoogleWorkspace"
+                            }
+                        ]
+                    }
+                },
+                "googleWorkspaceClientSecret": {
+                    "required": {
+                        "conditionGroup": [
+                            {
+                                "type": "equals",
+                                "attribute": "authenticationMethod",
+                                "value": "GoogleWorkspace"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

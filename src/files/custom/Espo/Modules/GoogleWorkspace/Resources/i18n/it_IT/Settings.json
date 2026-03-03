@@ -1,0 +1,17 @@
+{
+    "fields": {
+        "googleWorkspaceClientId": "Google Workspace Client ID",
+        "googleWorkspaceClientSecret": "Google Workspace Client Secret",
+        "googleWorkspaceHostedDomain": "Dominio Ospitato (es. ext.com)",
+        "googleWorkspaceCreateUser": "Crea Utenti Automaticamente",
+        "googleWorkspaceRedirectUri": "URI di Reindirizzamento",
+        "googleWorkspaceAllowAdminFallback": "Consenti l'accesso con Nome Utente/Password agli Amministratori",
+        "googleWorkspaceAllowRegularFallback": "Consenti l'accesso con Nome Utente/Password agli Utenti Normali",
+        "googleWorkspaceSyncAvatar": "Sincronizza Avatar Utente"
+    },
+    "options": {
+        "authenticationMethod": {
+            "GoogleWorkspace": "Google Workspace"
+        }
+    }
+}

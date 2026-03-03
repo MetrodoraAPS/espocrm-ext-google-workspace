@@ -1,0 +1,11 @@
+[
+    {
+        "route": "/GoogleWorkspace/authorizationData",
+        "method": "get",
+        "params": {
+            "controller": "GoogleWorkspace",
+            "action": "authorizationData"
+        },
+        "noAuth": true
+    }
+]

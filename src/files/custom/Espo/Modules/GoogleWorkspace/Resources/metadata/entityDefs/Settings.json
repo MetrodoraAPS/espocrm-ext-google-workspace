@@ -1,0 +1,35 @@
+{
+    "fields": {
+        "googleWorkspaceClientId": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "googleWorkspaceClientSecret": {
+            "type": "password",
+            "maxLength": 255
+        },
+        "googleWorkspaceHostedDomain": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "googleWorkspaceCreateUser": {
+            "type": "bool"
+        },
+        "googleWorkspaceRedirectUri": {
+            "type": "varchar",
+            "required": false
+        },
+        "googleWorkspaceAllowAdminFallback": {
+            "type": "bool",
+            "default": true
+        },
+        "googleWorkspaceAllowRegularFallback": {
+            "type": "bool",
+            "default": false
+        },
+        "googleWorkspaceSyncAvatar": {
+            "type": "bool",
+            "default": false
+        }
+    }
+}
