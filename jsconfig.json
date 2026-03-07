@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "paths": {
             "*": ["site/client/src/*"],
             "modules/crm/*": ["site/client/modules/crm/src/*"],
