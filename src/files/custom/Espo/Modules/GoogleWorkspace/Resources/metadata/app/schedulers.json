@@ -1,0 +1,7 @@
+{
+    "GoogleWorkspaceSync": {
+        "job": "Espo\\Modules\\GoogleWorkspace\\Jobs\\SyncGoogle",
+        "cron": "*/15 * * * *",
+        "scheduling": "every-15-minutes"
+    }
+}

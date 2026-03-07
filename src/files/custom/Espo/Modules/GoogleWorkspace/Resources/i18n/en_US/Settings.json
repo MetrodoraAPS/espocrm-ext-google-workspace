@@ -7,11 +7,30 @@
         "googleWorkspaceRedirectUri": "Redirect URI",
         "googleWorkspaceAllowAdminFallback": "Allow Username/Password login for Admins",
         "googleWorkspaceAllowRegularFallback": "Allow Username/Password login for Regular Users",
-        "googleWorkspaceSyncAvatar": "Sync User Avatar"
+        "googleWorkspaceSyncAvatar": "Sync User Avatar",
+        "googleWorkspaceServiceAccount": "Google Service Account JSON",
+        "googleWorkspaceAdminEmail": "Google Administrator Email (for Impersonation)",
+        "googleWorkspaceSyncOnLogin": "Sync User Data Immediately Upon SSO Login",
+        "googleWorkspaceEnableSync": "Enable Background Sync",
+        "googleWorkspaceSyncEmails": "Sync User Emails (All Aliases)",
+        "googleWorkspaceSyncNames": "Sync User Names (First Name, Last Name)",
+        "googleWorkspaceSyncPhones": "Sync Phone Numbers",
+        "googleWorkspaceSyncActive": "Sync User Active Status (Suspended/Active)",
+        "googleWorkspaceAdminGroup": "Google Group for Admin Privileges (Role: Admin)",
+        "googleWorkspaceUserWhitelistGroups": "User Sync Whitelist (Google Group emails, leave empty for all)",
+        "googleWorkspaceSyncGroups": "Sync Google Groups (as Teams)",
+        "googleWorkspaceSyncFrequency": "Background Sync Frequency"
     },
     "options": {
         "authenticationMethod": {
             "GoogleWorkspace": "Google Workspace"
+        },
+        "googleWorkspaceSyncFrequency": {
+            "15_minutes": "Every 15 Minutes",
+            "1_hour": "Every Hour",
+            "2_hours": "Every 2 Hours",
+            "12_hours": "Every 12 Hours",
+            "24_hours": "Every 24 Hours"
         }
     }
 }

@@ -7,11 +7,30 @@
         "googleWorkspaceRedirectUri": "URI di Reindirizzamento",
         "googleWorkspaceAllowAdminFallback": "Consenti l'accesso con Nome Utente/Password agli Amministratori",
         "googleWorkspaceAllowRegularFallback": "Consenti l'accesso con Nome Utente/Password agli Utenti Normali",
-        "googleWorkspaceSyncAvatar": "Sincronizza Avatar Utente"
+        "googleWorkspaceSyncAvatar": "Sincronizza Avatar Utente",
+        "googleWorkspaceServiceAccount": "JSON Service Account Google",
+        "googleWorkspaceAdminEmail": "Email Amministratore Google (per Impersonation)",
+        "googleWorkspaceSyncOnLogin": "Sincronizza Dati Utente all'Accesso (SSO)",
+        "googleWorkspaceEnableSync": "Abilita Sincronizzazione in Background",
+        "googleWorkspaceSyncEmails": "Sincronizza Indirizzi Email (Tutti gli Alias)",
+        "googleWorkspaceSyncNames": "Sincronizza Nomi Utente (Nome, Cognome)",
+        "googleWorkspaceSyncPhones": "Sincronizza Numeri di Telefono",
+        "googleWorkspaceSyncActive": "Sincronizza Stato Utente Attivo/Sospeso",
+        "googleWorkspaceAdminGroup": "Gruppo Google per Privilegi Admin (Ruolo: Admin)",
+        "googleWorkspaceUserWhitelistGroups": "Whitelist Utenti (Email di Gruppi Google, vuoto per tutti)",
+        "googleWorkspaceSyncGroups": "Sincronizza Gruppi Google (come Team in EspoCRM)",
+        "googleWorkspaceSyncFrequency": "Frequenza Sincronizzazione in Background"
     },
     "options": {
         "authenticationMethod": {
             "GoogleWorkspace": "Google Workspace"
+        },
+        "googleWorkspaceSyncFrequency": {
+            "15_minutes": "Ogni 15 Minuti",
+            "1_hour": "Ogni Ora",
+            "2_hours": "Ogni 2 Ore",
+            "12_hours": "Ogni 12 Ore",
+            "24_hours": "Ogni 24 Ore"
         }
     }
 }

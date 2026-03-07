@@ -1,7 +1,7 @@
 {
   "name": "espocrm-ext-google-workspace",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Google Workspace SSO and Background Sync integration for EspoCRM.",
   "scripts": {
     "sa": "node build --copy && node build --composer-install && php -d memory_limit=1G site/vendor/bin/phpstan",
     "unit-tests": "node build --copy && node build --composer-install && cd site && php vendor/bin/phpunit tests/unit/Espo/Modules/GoogleWorkspace",

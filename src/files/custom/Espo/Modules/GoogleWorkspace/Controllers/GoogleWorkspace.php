@@ -9,12 +9,9 @@ use Espo\Core\Utils\Json;
 
 class GoogleWorkspace
 {
-    private Config $config;
-
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
+    public function __construct(
+        private Config $config
+    ) {}
 
     public function getActionAuthorizationData(Request $request, Response $response): void
     {

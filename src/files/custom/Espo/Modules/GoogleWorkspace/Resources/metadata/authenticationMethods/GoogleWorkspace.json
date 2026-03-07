@@ -42,7 +42,50 @@
                     {"name": "googleWorkspaceAllowRegularFallback"}
                 ],
                 [
+                    {"name": "googleWorkspaceServiceAccount"}
+                ],
+                [
+                    {"name": "googleWorkspaceAdminEmail"}
+                ],
+                [
+                    {"name": "googleWorkspaceSyncOnLogin"}
+                ],
+                [
+                    {"name": "googleWorkspaceEnableSync"}
+                ],
+                [
+                    {
+                        "name": "googleWorkspaceSyncFrequency",
+                        "dependency": {
+                            "type": "equals",
+                            "attribute": "googleWorkspaceEnableSync",
+                            "value": true
+                        }
+                    }
+                ],
+                [
+                    {"name": "googleWorkspaceUserWhitelistGroups"}
+                ],
+                [
+                    {"name": "googleWorkspaceSyncEmails"}
+                ],
+                [
+                    {"name": "googleWorkspaceSyncNames"}
+                ],
+                [
+                    {"name": "googleWorkspaceSyncPhones"}
+                ],
+                [
+                    {"name": "googleWorkspaceSyncActive"}
+                ],
+                [
+                    {"name": "googleWorkspaceAdminGroup"}
+                ],
+                [
                     {"name": "googleWorkspaceSyncAvatar"}
+                ],
+                [
+                    {"name": "googleWorkspaceSyncGroups"}
                 ]
             ]
         },
@@ -54,7 +97,19 @@
             "googleWorkspaceCreateUser",
             "googleWorkspaceAllowAdminFallback",
             "googleWorkspaceAllowRegularFallback",
-            "googleWorkspaceSyncAvatar"
+            "googleWorkspaceServiceAccount",
+            "googleWorkspaceAdminEmail",
+            "googleWorkspaceSyncOnLogin",
+            "googleWorkspaceEnableSync",
+            "googleWorkspaceSyncFrequency",
+            "googleWorkspaceUserWhitelistGroups",
+            "googleWorkspaceSyncEmails",
+            "googleWorkspaceSyncNames",
+            "googleWorkspaceSyncPhones",
+            "googleWorkspaceSyncActive",
+            "googleWorkspaceAdminGroup",
+            "googleWorkspaceSyncAvatar",
+            "googleWorkspaceSyncGroups"
         ],
         "dynamicLogic": {
             "fields": {

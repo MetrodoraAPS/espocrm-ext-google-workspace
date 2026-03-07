@@ -30,6 +30,62 @@
         "googleWorkspaceSyncAvatar": {
             "type": "bool",
             "default": false
+        },
+        "googleWorkspaceServiceAccount": {
+            "type": "text"
+        },
+        "googleWorkspaceAdminEmail": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "googleWorkspaceSyncOnLogin": {
+            "type": "bool",
+            "default": false
+        },
+        "googleWorkspaceEnableSync": {
+            "type": "bool",
+            "default": false
+        },
+        "googleWorkspaceSyncEmails": {
+            "type": "bool",
+            "default": true
+        },
+        "googleWorkspaceSyncNames": {
+            "type": "bool",
+            "default": true
+        },
+        "googleWorkspaceSyncPhones": {
+            "type": "bool",
+            "default": true
+        },
+        "googleWorkspaceSyncActive": {
+            "type": "bool",
+            "default": true
+        },
+        "googleWorkspaceAdminGroup": {
+            "type": "varchar",
+            "maxLength": 255
+        },
+        "googleWorkspaceUserWhitelistGroups": {
+            "type": "array"
+        },
+        "googleWorkspaceSyncGroups": {
+            "type": "bool",
+            "default": false
+        },
+        "googleWorkspaceSyncFrequency": {
+            "type": "enum",
+            "options": [
+                "15_minutes",
+                "1_hour",
+                "2_hours",
+                "12_hours",
+                "24_hours"
+            ],
+            "default": "1_hour"
+        },
+        "googleWorkspaceLastSyncTime": {
+            "type": "int"
         }
     }
 }

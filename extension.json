@@ -1,7 +1,8 @@
 {
     "module": "GoogleWorkspace",
     "name": "GoogleWorkspace",
-    "description": "Google Workspace SSO/SCIM integration for EspoCRM.",
+    "description": "Google Workspace SSO integration and Background Sync for EspoCRM.",
+    "version": "0.1.0",
     "author": "Metrodora APS",
     "bundled": true,
     "acceptableVersions": [

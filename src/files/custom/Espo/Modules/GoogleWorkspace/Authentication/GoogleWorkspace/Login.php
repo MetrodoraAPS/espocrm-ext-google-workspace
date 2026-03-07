@@ -8,11 +8,14 @@ use Espo\Core\Authentication\Login\Data;
 use Espo\Core\Authentication\Logins\Espo;
 use Espo\Core\Authentication\Result;
 use Espo\Core\Authentication\Result\FailReason;
-use Espo\Core\ORM\EntityManagerProxy;
+use Espo\Core\ORM\EntityManager;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Json;
 use Espo\Core\Utils\Log;
 use Espo\Core\ApplicationState;
+use Espo\Core\Container;
+use Espo\Modules\GoogleWorkspace\Services\GoogleSyncService;
+use Espo\Modules\GoogleWorkspace\Jobs\SyncGoogle;
 
 class Login implements LoginInterface
 {
@@ -21,9 +24,11 @@ class Login implements LoginInterface
     public function __construct(
         private Espo $espoLogin,
         private Config $config,
-        private EntityManagerProxy $entityManager,
+        private EntityManager $entityManager,
         private Log $log,
-        private ApplicationState $applicationState
+        private ApplicationState $applicationState,
+        private GoogleSyncService $syncService,
+        private Container $container
     ) {}
 
     public function login(Data $data, Request $request): Result
@@ -77,16 +82,22 @@ class Login implements LoginInterface
         }
 
         /** @var \Espo\Entities\User|null $user */
-        $user = $this->entityManager->getRepository('User')
+        $user = $this->entityManager->getRDBRepository(\Espo\Entities\User::ENTITY_TYPE)
             ->where(['emailAddress' => $userInfo->email])
             ->findOne();
 
         if (!$user) {
             if ($this->config->get('googleWorkspaceCreateUser')) {
                 /** @var \Espo\Entities\User $user */
-                $user = $this->entityManager->getEntity('User');
-                $user->set('userName', $userInfo->email);
-                $user->set('emailAddress', $userInfo->email);
+                $user = $this->entityManager->getNewEntity(\Espo\Entities\User::ENTITY_TYPE);
+                $userName = explode('@', $userInfo->email)[0];
+                $user->set('userName', $userName);
+                $user->set('emailAddressData', [
+                    (object)[
+                        'emailAddress' => $userInfo->email,
+                        'primary' => true
+                    ]
+                ]);
                 $user->set('firstName', $userInfo->given_name ?? '');
                 $user->set('lastName', $userInfo->family_name ?? '');
                 $user->set('isActive', true);
@@ -98,11 +109,33 @@ class Login implements LoginInterface
         }
 
         if (!$user->isActive()) {
-            return Result::fail(FailReason::INACTIVE_USER);
+            return Result::fail(FailReason::DENIED);
         }
 
-        if ($this->config->get('googleWorkspaceSyncAvatar') && !empty($userInfo->picture)) {
-            $this->syncAvatar($user, $userInfo->picture);
+        if ($this->config->get('googleWorkspaceSyncOnLogin')) {
+            try {
+                // Temporary register user in container to satisfy hooks/audit
+                // Using reflection because Container::set throws if already exists, 
+                // and we need to be able to UNSET it afterwards to avoid "Service already set" error later.
+                $reflection = new \ReflectionClass($this->container);
+                $property = $reflection->getProperty('data');
+                $property->setAccessible(true);
+                $data = $property->getValue($this->container);
+                
+                $data['user'] = $user;
+                $property->setValue($this->container, $data);
+
+                try {
+                    $syncJob = new SyncGoogle($this->config, $this->log, $this->syncService);
+                    $syncJob->syncSingleUser($userInfo->email);
+                } finally {
+                    // CRITICAL: Unset 'user' service so Espo can set it session-wide normally after login
+                    unset($data['user']);
+                    $property->setValue($this->container, $data);
+                }
+            } catch (\Exception $e) {
+                $this->log->error("GoogleWorkspace SSO: Error triggering single user sync on login: " . $e->getMessage());
+            }
         }
 
         return Result::success($user)->withBypassSecondStep();
@@ -150,82 +183,50 @@ class Login implements LoginInterface
             'redirect_uri' => $redirectUri
         ];
 
-        $ch = curl_init('https://oauth2.googleapis.com/token');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-
-        $response = curl_exec($ch);
-        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($status >= 400) {
-            $this->log->error("GoogleWorkspace: Bad token request. Response: $response");
-            return null;
-        }
-
-        return Json::decode($response);
+        return $this->apiRequest('https://oauth2.googleapis.com/token', $params);
     }
 
     private function requestUserInfo(string $accessToken): ?\stdClass
     {
-        $ch = curl_init('https://openidconnect.googleapis.com/v1/userinfo');
+        return $this->apiRequest('https://openidconnect.googleapis.com/v1/userinfo', null, $accessToken);
+    }
+
+    /**
+     * @param array<string, mixed>|null $postParams
+     */
+    private function apiRequest(string $url, ?array $postParams = null, ?string $bearerToken = null): ?\stdClass
+    {
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Authorization: Bearer {$accessToken}"
-        ]);
+
+        $headers = [];
+        if ($bearerToken) {
+            $headers[] = "Authorization: Bearer {$bearerToken}";
+        }
+
+        if ($postParams !== null) {
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postParams));
+            $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+        }
+
+        if (!empty($headers)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
 
         $response = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         if ($status >= 400) {
-            $this->log->error("GoogleWorkspace: Bad userinfo request. Response: $response");
+            $this->log->error("GoogleWorkspace API Error ($url): $response");
+            return null;
+        }
+
+        if (!is_string($response)) {
             return null;
         }
 
         return Json::decode($response);
-    }
-
-    private function syncAvatar(\Espo\Entities\User $user, string $pictureUrl): void
-    {
-        $ch = curl_init($pictureUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        $imageContent = curl_exec($ch);
-        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($status >= 400 || empty($imageContent)) {
-            $this->log->error("GoogleWorkspace: Failed to download user avatar from $pictureUrl");
-            return;
-        }
-
-        $avatarId = $user->get('avatarId');
-        if ($avatarId) {
-            $oldAttachment = $this->entityManager->getEntityById('Attachment', $avatarId);
-            if ($oldAttachment && $oldAttachment->get('size') === strlen($imageContent)) {
-                return; // Picture probably didn't change (heuristic to avoid unnecessary database operations)
-            }
-        }
-
-        /** @var \Espo\Entities\Attachment $attachment */
-        $attachment = $this->entityManager->getNewEntity('Attachment');
-        $attachment->set('name', 'google_avatar.jpg');
-        $attachment->set('type', 'image/jpeg');
-        $attachment->set('role', 'Attachment');
-        $attachment->set('global', true);
-        $attachment->set('contents', $imageContent);
-
-        $this->entityManager->saveEntity($attachment, ['skipHooks' => true]);
-
-        $user->set('avatarId', $attachment->getId());
-        // Temporarily avoid tracking changes just to update the avatar ID
-        $this->entityManager->saveEntity($user, ['silent' => true, 'skipHooks' => true]);
-
-        if (isset($oldAttachment) && $oldAttachment) {
-            $this->entityManager->getRDBRepository('Attachment')->remove($oldAttachment); // Clean up the old avatar to free up space
-        }
     }
 }
